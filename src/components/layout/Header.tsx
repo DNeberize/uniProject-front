@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router'
 import { HEADER_NAV, ROUTES } from '../../config/routes.ts'
+import UserMenu from './UserMenu.tsx'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
@@ -36,15 +37,18 @@ export default function Header() {
           ))}
         </nav>
 
-        <button
-          type="button"
-          aria-label="მენიუ"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((open) => !open)}
-          className="p-2 text-secondary transition-colors hover:bg-surface-container hover:text-on-surface xl:hidden"
-        >
-          <span className="material-symbols-outlined text-[24px]">{menuOpen ? 'close' : 'menu'}</span>
-        </button>
+        <div className="flex items-center gap-space-sm">
+          <UserMenu />
+          <button
+            type="button"
+            aria-label="მენიუ"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
+            className="p-2 text-secondary transition-colors hover:bg-surface-container hover:text-on-surface xl:hidden"
+          >
+            <span className="material-symbols-outlined text-[24px]">{menuOpen ? 'close' : 'menu'}</span>
+          </button>
+        </div>
       </div>
 
       {menuOpen && (
