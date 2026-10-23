@@ -3,11 +3,20 @@
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
-    @apply bg-background text-on-surface font-body text-body-md antialiased;
+    @apply bg-sheet bg-dots text-on-surface font-body text-body-md antialiased;
+  }
+
+  ::selection {
+    background: var(--color-marker);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
   }
 }
 
@@ -16,4 +25,188 @@
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
   line-height: 1;
   user-select: none;
+}
+
+/* ---------- Notebook paper ---------- */
+
+/* Dot-grid paper, the default page background */
+@utility bg-dots {
+  background-image: radial-gradient(circle at 1px 1px, rgb(19 26 43 / 0.14) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+
+/* Ruled lines, 32px apart, anchored to the bottom edge */
+@utility bg-ruled {
+  background-color: var(--color-paper);
+  background-image: linear-gradient(to top, var(--color-rule) 1px, transparent 1px);
+  background-size: 100% 32px;
+  background-position: left bottom;
+}
+
+/* Red double margin line on the left of the element (set --margin-x to move it) */
+@utility margin-line {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--margin-x, 24px);
+    width: 4px;
+    border-left: 1px solid var(--color-margin);
+    border-right: 1px solid var(--color-margin);
+    pointer-events: none;
+  }
+}
+
+/* A white sheet of paper with a soft drop shadow (pair with <Tape />) */
+@utility sheet {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-sheet);
+  box-shadow:
+    0 1px 2px rgb(19 26 43 / 0.05),
+    0 22px 44px -28px rgb(19 26 43 / 0.35);
+}
+
+/* Primary button that sits on a darker edge and presses down like a key */
+@utility btn-press {
+  box-shadow: 0 3px 0 var(--color-press);
+  transition: background-color 0.15s, translate 0.12s, box-shadow 0.12s;
+
+  &:hover {
+    translate: 0 -1px;
+    box-shadow: 0 4px 0 var(--color-press);
+  }
+
+  &:active {
+    translate: 0 3px;
+    box-shadow: 0 0 0 var(--color-press);
+  }
+}
+
+/* Red-pen link underline */
+@utility pen-link {
+  text-decoration: underline;
+  text-decoration-color: rgb(220 38 38 / 0.5);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+
+  &:hover {
+    color: #a8121c;
+    text-decoration-color: currentColor;
+  }
+}
+
+/* ---------- Doodle pieces (used by components/notebook) ---------- */
+
+.tape {
+  position: absolute;
+  width: 92px;
+  height: 26px;
+  background: var(--color-tape);
+  clip-path: polygon(0 8%, 5% 0, 12% 6%, 20% 0, 80% 4%, 88% 0, 95% 6%, 100% 0, 98% 50%, 100% 100%, 92% 94%, 85% 100%, 15% 96%, 8% 100%, 0 92%, 3% 50%);
+  pointer-events: none;
+}
+
+.tape--striped {
+  background: repeating-linear-gradient(135deg, rgb(220 38 38 / 0.32) 0 6px, rgb(255 255 255 / 0.35) 6px 12px);
+}
+
+.tape--clear {
+  background: rgb(255 255 255 / 0.55);
+}
+
+.highlight {
+  position: relative;
+  z-index: 0;
+  color: inherit;
+  background: none;
+}
+
+.highlight::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -0.1em;
+  right: -0.14em;
+  top: 0.42em;
+  bottom: 0.04em;
+  background: var(--color-marker);
+  border-radius: 0.18em 0.5em 0.28em 0.6em;
+  transform: rotate(-1.4deg);
+  transform-origin: left center;
+  animation: nb-swipe 0.6s 0.3s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+.doodle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+
+.doodle path {
+  stroke-dasharray: 1;
+  animation: nb-draw 0.8s var(--draw-delay, 0s) ease-out both;
+}
+
+.sticky-note {
+  position: relative;
+  background: var(--color-sticky);
+  color: var(--color-on-sticky);
+  border-radius: 2px 2px 14px 2px / 2px 2px 6px 2px;
+  box-shadow:
+    0 1px 1px rgb(60 45 0 / 0.08),
+    0 14px 24px -14px rgb(80 60 0 / 0.45);
+  transition: rotate 0.3s ease, translate 0.3s ease;
+  animation: nb-stick 0.6s 0.1s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+}
+
+.rise {
+  animation: nb-rise 0.5s ease-out both;
+}
+
+@keyframes nb-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes nb-swipe {
+  from {
+    transform: rotate(-1.4deg) scaleX(0);
+  }
+}
+
+@keyframes nb-stick {
+  from {
+    opacity: 0;
+    translate: 0 -18px;
+    scale: 1.04;
+  }
+}
+
+@keyframes nb-rise {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

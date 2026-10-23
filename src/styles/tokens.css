@@ -1,6 +1,6 @@
 /*
- * Design tokens — generated from the Stitch design system
- * "Academic Repository Terminal" (project 137108041435856735).
+ * Design tokens. Type scale and spacing come from the Stitch design system
+ * "Academic Repository Terminal"; colours were redone as a light notebook palette.
  *
  * Every variable here becomes a Tailwind utility, e.g.
  *   --color-primary-container  -> bg-primary-container, text-primary-container, border-primary-container
@@ -11,9 +11,11 @@
 
 @theme {
   /* ---------- Fonts ---------- */
-  --font-headline: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-label: "Geist", ui-sans-serif, system-ui, sans-serif;
+  /* Geist has no Georgian letters, so Georgian text falls through to Noto Sans Georgian */
+  --font-headline: "Noto Serif Georgian", Georgia, "Times New Roman", serif;
+  --font-body: "Geist", "Noto Sans Georgian", ui-sans-serif, system-ui, sans-serif;
+  --font-label: "Geist", "Noto Sans Georgian", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Caveat", "Noto Sans Georgian", cursive;
   --font-code: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
 
   /* ---------- Type scale ---------- */
@@ -72,71 +74,88 @@
   --text-code-sm--line-height: 16px;
   --text-code-sm--font-weight: 400;
 
-  /* ---------- Colors (Material-style roles from Stitch) ---------- */
-  --color-background: #0b1326;
-  --color-on-background: #dae2fd;
+  /* ---------- Colors ----------
+   * Light "exercise book" palette, shared with the Keycloak login theme.
+   * Same Material-style role names as before, so existing utilities keep working:
+   * primary = shield red, secondary = slate grey from the logo, tertiary = green.
+   */
+  --color-background: #fffdf9;
+  --color-on-background: #131a2b;
 
-  --color-surface: #0b1326;
-  --color-surface-dim: #0b1326;
-  --color-surface-bright: #31394d;
-  --color-surface-variant: #2d3449;
-  --color-surface-tint: #ffb4ab;
-  --color-surface-container-lowest: #060e20;
-  --color-surface-container-low: #131b2e;
-  --color-surface-container: #171f33;
-  --color-surface-container-high: #222a3d;
-  --color-surface-container-highest: #2d3449;
-  --color-on-surface: #dae2fd;
-  --color-on-surface-variant: #e6bdb8;
-  --color-inverse-surface: #dae2fd;
-  --color-inverse-on-surface: #283044;
+  --color-surface: #fffdf9;
+  --color-surface-dim: #f6f2ea;
+  --color-surface-bright: #ffffff;
+  --color-surface-variant: #f1ece2;
+  --color-surface-tint: #dc2626;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #faf7f1;
+  --color-surface-container: #f6f2ea;
+  --color-surface-container-high: #efe9dd;
+  --color-surface-container-highest: #e3ddd1;
+  --color-on-surface: #131a2b;
+  --color-on-surface-variant: #454b58;
+  --color-inverse-surface: #131a2b;
+  --color-inverse-on-surface: #f6f2ea;
 
-  --color-outline: #ac8884;
-  --color-outline-variant: #5c403c;
+  --color-outline: #cdc5b6;
+  --color-outline-variant: #e3ddd1;
 
-  --color-primary: #ffb4ab;
-  --color-on-primary: #690005;
-  --color-primary-container: #dc2626;
-  --color-on-primary-container: #fff6f5;
-  --color-inverse-primary: #bf0715;
+  --color-primary: #dc2626;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #fce9e7;
+  --color-on-primary-container: #7a0b10;
+  --color-inverse-primary: #ffb4ab;
   --color-primary-fixed: #ffdad6;
   --color-primary-fixed-dim: #ffb4ab;
   --color-on-primary-fixed: #410002;
   --color-on-primary-fixed-variant: #93000b;
 
-  --color-secondary: #b9c8de;
-  --color-on-secondary: #233143;
-  --color-secondary-container: #39485a;
-  --color-on-secondary-container: #a7b6cc;
+  --color-secondary: #5b6170;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #eceef2;
+  --color-on-secondary-container: #2a2f3a;
   --color-secondary-fixed: #d4e4fa;
   --color-secondary-fixed-dim: #b9c8de;
   --color-on-secondary-fixed: #0d1c2d;
   --color-on-secondary-fixed-variant: #39485a;
 
-  --color-tertiary: #4edea3;
-  --color-on-tertiary: #003824;
-  --color-tertiary-container: #008259;
-  --color-on-tertiary-container: #e1ffec;
+  --color-tertiary: #00714e;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #e1f3e9;
+  --color-on-tertiary-container: #00391f;
   --color-tertiary-fixed: #6ffbbe;
   --color-tertiary-fixed-dim: #4edea3;
   --color-on-tertiary-fixed: #002113;
   --color-on-tertiary-fixed-variant: #005236;
 
-  --color-error: #ffb4ab;
-  --color-on-error: #690005;
-  --color-error-container: #93000a;
-  --color-on-error-container: #ffdad6;
+  --color-error: #b4161d;
+  --color-on-error: #ffffff;
+  --color-error-container: #fdeceb;
+  --color-on-error-container: #6f0c12;
 
-  /* Material status badges (from the design system's component guidelines) */
-  --color-status-approved: #10b981;
-  --color-status-approved-bg: #064e3b;
-  --color-status-approved-border: #047857;
-  --color-status-pending: #f59e0b;
-  --color-status-pending-bg: #451a03;
-  --color-status-pending-border: #b45309;
-  --color-status-rejected: #f87171;
-  --color-status-rejected-bg: #450a0a;
-  --color-status-rejected-border: #991b1b;
+  /* Status badges, light versions */
+  --color-status-approved: #00714e;
+  --color-status-approved-bg: #e3f4ea;
+  --color-status-approved-border: #8fd1b0;
+  --color-status-pending: #9a4a06;
+  --color-status-pending-bg: #fdf1dc;
+  --color-status-pending-border: #f0c27a;
+  --color-status-rejected: #b4161d;
+  --color-status-rejected-bg: #fdeceb;
+  --color-status-rejected-border: #f2a7a3;
+
+  /* Notebook extras: paper, pen, marker, sticky note, tape */
+  --color-paper: #f6f2ea;
+  --color-sheet: #fffdf9;
+  --color-ink: #131a2b;
+  --color-rule: rgb(19 26 43 / 0.075);
+  --color-margin: rgb(220 38 38 / 0.42);
+  --color-pen: #2b4ea2;
+  --color-marker: rgb(255 205 0 / 0.55);
+  --color-sticky: #ffe27a;
+  --color-on-sticky: #3b3420;
+  --color-tape: rgb(244 214 120 / 0.72);
+  --color-press: #8f0f17;
 
   /* ---------- Spacing ---------- */
   --spacing-space-xs: 0.25rem;
@@ -154,4 +173,5 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-full: 9999px;
+  --radius-sheet: 6px;
 }
