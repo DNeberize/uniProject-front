@@ -37,7 +37,7 @@ export default function Header() {
             <img src="/logo.png" alt="SANGU" className="h-8 w-auto shrink-0 object-contain sm:h-9" />
             <div className="flex min-w-0 flex-col">
               <span className="truncate font-headline text-[15px] font-semibold leading-5 tracking-tight text-ink sm:text-headline-sm">
-                SANGU NoteHub
+                SANGU NoteBase
               </span>
               <span className="hidden font-label text-label-sm text-secondary sm:block">
                 აკადემიური პლატფორმა
