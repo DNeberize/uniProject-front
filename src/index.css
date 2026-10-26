@@ -63,6 +63,11 @@
   user-select: none;
 }
 
+/* Until the icon font is ready (main.tsx adds .icons-ready), keep the ligature text invisible */
+html:not(.icons-ready) .material-symbols-outlined {
+  color: transparent;
+}
+
 /* ---------- Notebook paper ---------- */
 
 /* Dot-grid paper, the default page background */
