@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { materialPath } from '../../config/routes.ts'
 import type { MaterialSummary } from '../../mocks/materials.ts'
 import Tape from '../notebook/Tape.tsx'
+import LikeButton from './LikeButton.tsx'
 
 const dateFormat = new Intl.DateTimeFormat('ka-GE', { day: 'numeric', month: 'short', year: 'numeric' })
 
@@ -50,11 +51,7 @@ export default function MaterialCard({ material, index = 0 }: MaterialCardProps)
             {dateFormat.format(new Date(material.uploadDate))}
           </time>
         </div>
-        <p className="flex shrink-0 items-center gap-1 font-hand text-[22px] leading-none text-ink" aria-label={`რეიტინგი ${material.rating}`}>
-          <span className="material-symbols-outlined text-[18px] text-primary [font-variation-settings:'FILL'_1]">star</span>
-          {material.rating.toFixed(1)}
-          <span className="font-body text-body-sm text-secondary">({material.ratingCount})</span>
-        </p>
+        <LikeButton initialLiked={material.likedByMe} initialCount={material.likes} className="shrink-0" />
       </div>
     </article>
   )

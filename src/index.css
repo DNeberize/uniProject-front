@@ -14,7 +14,6 @@
     background: var(--color-marker);
   }
 
-  /* Scrollbars: thin slate "pencil" thumb on the paper track, red on hover */
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-outline) transparent;
@@ -48,9 +47,6 @@
     outline-offset: 2px;
   }
 }
-
-/* Google Material Symbols icon font (loaded in index.html) */
-/* Fixed 1em box so the ligature name ("person", "search"…) can never stretch the layout before the font arrives */
 .material-symbols-outlined {
   display: inline-block;
   width: 1em;
@@ -61,6 +57,115 @@
   line-height: 1;
   white-space: nowrap;
   user-select: none;
+}
+
+.material-symbols-outlined.icon-filled {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+
+.material-symbols-outlined.like-heart {
+  color: var(--color-primary);
+  transition: font-variation-settings 0.35s ease;
+}
+
+.material-symbols-outlined.like-heart.is-liked {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.like-pop {
+  animation: heart-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+.like-regrow {
+  animation: heart-regrow 0.75s ease both;
+}
+
+.heart-shard {
+  position: absolute;
+  inset: 0;
+  color: var(--color-primary);
+  pointer-events: none;
+}
+
+.heart-shard--left {
+  clip-path: polygon(0 0, 52% 0, 42% 28%, 58% 48%, 44% 70%, 52% 100%, 0 100%);
+  transform-origin: 50% 100%;
+  animation: heart-break-left 0.65s ease-in forwards;
+}
+
+.heart-shard--right {
+  clip-path: polygon(52% 0, 100% 0, 100% 100%, 52% 100%, 44% 70%, 58% 48%, 42% 28%);
+  transform-origin: 50% 100%;
+  animation: heart-break-right 0.65s ease-in forwards;
+}
+
+/* Fills from outline to solid while it pops */
+@keyframes heart-pop {
+  0% {
+    scale: 0.8;
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  }
+  45% {
+    scale: 1.35;
+  }
+  60% {
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+  }
+  75% {
+    scale: 0.95;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+@keyframes heart-break-left {
+  0% {
+    transform: none;
+  }
+  12% {
+    transform: translateX(1px) rotate(4deg);
+  }
+  24% {
+    transform: translateX(-1px) rotate(-6deg);
+  }
+  100% {
+    transform: translate(-7px, 9px) rotate(-35deg);
+    opacity: 0;
+  }
+}
+
+@keyframes heart-break-right {
+  0% {
+    transform: none;
+  }
+  12% {
+    transform: translateX(-1px) rotate(-4deg);
+  }
+  24% {
+    transform: translateX(1px) rotate(6deg);
+  }
+  100% {
+    transform: translate(7px, 9px) rotate(35deg);
+    opacity: 0;
+  }
+}
+
+@keyframes heart-regrow {
+  0%,
+  55% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  85% {
+    opacity: 1;
+    scale: 1.1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
 }
 
 /* Until the icon font is ready (main.tsx adds .icons-ready), keep the ligature text invisible */
@@ -249,5 +354,10 @@ html:not(.icons-ready) .material-symbols-outlined {
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+
+  /* Without motion the broken halves would just sit on top of the heart */
+  .heart-shard {
+    display: none;
   }
 }

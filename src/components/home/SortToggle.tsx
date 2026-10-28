@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
-type SortBy = 'date' | 'rating'
+type SortBy = 'date' | 'likes'
 
 const OPTIONS: { value: SortBy; label: string }[] = [
   { value: 'date', label: 'უახლესი' },
-  { value: 'rating', label: 'საუკეთესო რეიტინგი' },
+  { value: 'likes', label: 'ყველაზე მოწონებული' },
 ]
 
 export default function SortToggle() {

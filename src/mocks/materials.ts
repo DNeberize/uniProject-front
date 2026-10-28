@@ -10,8 +10,9 @@ export type MaterialSummary = {
   tags: MaterialTag[]
   uploader: string
   uploadDate: string
-  rating: number
-  ratingCount: number
+  likes: number
+  /** Whether the current user has liked it */
+  likedByMe: boolean
 }
 
 export const MATERIAL_TAGS: MaterialTag[] = ['შუალედური', 'ფინალური', 'სილაბუსი', 'კონსპექტი', 'წიგნი', 'პრეზენტაცია']
@@ -25,8 +26,8 @@ export const MOCK_MATERIALS: MaterialSummary[] = [
     tags: ['კონსპექტი', 'შუალედური'],
     uploader: 'დავით კვარაცხელია',
     uploadDate: '2025-02-14',
-    rating: 4.9,
-    ratingCount: 34,
+    likes: 34,
+    likedByMe: true,
   },
   {
     id: 2,
@@ -36,8 +37,8 @@ export const MOCK_MATERIALS: MaterialSummary[] = [
     tags: ['პრეზენტაცია'],
     uploader: 'ნინო ახვლედიანი',
     uploadDate: '2025-02-08',
-    rating: 4.8,
-    ratingCount: 29,
+    likes: 29,
+    likedByMe: false,
   },
   {
     id: 3,
@@ -47,8 +48,8 @@ export const MOCK_MATERIALS: MaterialSummary[] = [
     tags: ['ფინალური'],
     uploader: 'მარიამ გელოვანი',
     uploadDate: '2025-01-27',
-    rating: 4.7,
-    ratingCount: 52,
+    likes: 52,
+    likedByMe: false,
   },
   {
     id: 4,
@@ -58,7 +59,7 @@ export const MOCK_MATERIALS: MaterialSummary[] = [
     tags: ['სილაბუსი'],
     uploader: 'სანდრო გაბუნია',
     uploadDate: '2025-01-11',
-    rating: 4.9,
-    ratingCount: 22,
+    likes: 22,
+    likedByMe: false,
   },
 ]
