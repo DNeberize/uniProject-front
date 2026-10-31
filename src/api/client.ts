@@ -17,5 +17,8 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   if (!response.ok) {
     throw new ApiError(response.status, `${init?.method ?? 'GET'} /api${path} failed with ${response.status}`)
   }
+  if (!response.headers.get('content-type')?.includes('json')) {
+    throw new ApiError(response.status, `${init?.method ?? 'GET'} /api${path} returned ${response.headers.get('content-type')} instead of JSON, is /api proxied to the backend?`)
+  }
   return response.json() as Promise<T>
 }
