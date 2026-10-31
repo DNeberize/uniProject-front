@@ -1,4 +1,6 @@
 
+const API_URL = import.meta.env.VITE_API_URL ?? ''
+
 export class ApiError extends Error {
   readonly status: number
 
@@ -9,9 +11,9 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`${API_URL}/api${path}`, {
     ...init,
-    credentials: 'same-origin',
+    credentials: API_URL ? 'include' : 'same-origin',
     headers: { Accept: 'application/json', ...init?.headers },
   })
   if (!response.ok) {
