@@ -1,5 +1,7 @@
+import { Link } from 'react-router'
 import type { UserRole } from '../../api/user.ts'
 import { useCurrentUser } from '../../auth/useCurrentUser.ts'
+import { ROUTES } from '../../config/routes.ts'
 
 const ROLE_LABELS: Record<UserRole, string> = {
   USER: 'სტუდენტი',
@@ -12,9 +14,10 @@ export default function UserMenu() {
 
   return (
     <div className="flex shrink-0 items-center gap-space-sm">
-      <div
+      <Link
+        to={ROUTES.profile}
         title={user?.email}
-        className="flex items-center gap-space-sm rounded-full border border-outline-variant bg-surface-container-lowest p-1 md:pl-space-md"
+        className="flex items-center gap-space-sm rounded-full border border-outline-variant bg-surface-container-lowest p-1 transition-colors hover:border-outline hover:bg-surface-container-low md:pl-space-md"
       >
         <div className="hidden flex-col text-right md:flex">
           {user ? (
@@ -38,7 +41,7 @@ export default function UserMenu() {
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
           <span className="material-symbols-outlined text-[18px] text-on-primary">person</span>
         </div>
-      </div>
+      </Link>
 
       <form method="post" action="/logout">
         <button

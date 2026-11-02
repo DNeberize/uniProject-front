@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage.tsx'
 import MaterialDetailsPage from './pages/MaterialDetailsPage.tsx'
 import ModerationPage from './pages/ModerationPage.tsx'
 import NotFoundPage from './pages/NotFoundPage.tsx'
+import ProfilePage from './pages/ProfilePage.tsx'
 import RegisterPage from './pages/RegisterPage.tsx'
 import UploadPage from './pages/UploadPage.tsx'
 
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.favorites, element: <FavoritesPage /> },
       { path: ROUTES.moderation, element: <ModerationPage /> },
       { path: ROUTES.admin, element: <AdminPage /> },
+      { path: ROUTES.profile, element: <ProfilePage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },
