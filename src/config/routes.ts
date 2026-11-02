@@ -7,6 +7,7 @@ export const ROUTES = {
   favorites: '/favorites',
   moderation: '/moderation',
   admin: '/admin',
+  profile: '/profile',
 } as const
 
 export const materialPath = (id: string | number) => `/materials/${id}`
