@@ -65,7 +65,6 @@ export default function ProfilePage() {
             tabs={[
               { id: 'uploads', label: 'ჩემი ატვირთვები', count: COUNTS.ALL },
               { id: 'saved', label: '🔖 შენახული მასალები', count: MOCK_SAVED_MATERIALS.length },
-              { id: 'comments', label: '💬 კომენტარები', hideOnMobile: true },
             ]}
           />
 
@@ -116,10 +115,6 @@ export default function ProfilePage() {
                   <SavedMaterialCard key={material.id} material={material} index={index} />
                 ))}
               </div>
-            )}
-
-            {tab === 'comments' && (
-              <p className="py-space-xl text-center font-hand text-[22px] text-secondary">კომენტარები მალე დაემატება ✎</p>
             )}
           </div>
         </div>

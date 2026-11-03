@@ -1,11 +1,9 @@
-export type ProfileTabId = 'uploads' | 'saved' | 'comments'
+export type ProfileTabId = 'uploads' | 'saved'
 
 type ProfileTab = {
   id: ProfileTabId
   label: string
   count?: number
-  /** Hide on phones so the tabs fit on one row */
-  hideOnMobile?: boolean
 }
 
 type ProfileTabsProps = {
@@ -27,9 +25,7 @@ export default function ProfileTabs({ tabs, active, onChange }: ProfileTabsProps
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(tab.id)}
-            className={`relative cursor-pointer items-center gap-2 rounded-t-xl font-headline transition-colors ${
-              tab.hideOnMobile ? 'hidden sm:flex' : 'flex'
-            } ${
+            className={`relative flex cursor-pointer items-center gap-2 rounded-t-xl font-headline transition-colors ${
               isActive
                 ? 'z-10 -mb-0.5 border-2 border-b-0 border-outline bg-white px-4 py-2.5 text-body-md font-bold text-ink sm:px-6 sm:text-body-lg'
                 : 'border border-b-0 border-outline bg-surface-container-high px-3.5 py-2 text-body-sm font-semibold text-on-surface-variant hover:bg-surface-container-highest sm:px-5 sm:text-body-md'
