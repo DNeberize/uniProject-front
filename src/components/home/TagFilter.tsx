@@ -1,11 +1,12 @@
-import { useState } from 'react'
-import { MATERIAL_TAGS, type MaterialTag } from '../../mocks/materials.ts'
+type TagFilterProps = {
+  tags: string[]
+  selected: string[]
+  onChange: (selected: string[]) => void
+}
 
-export default function TagFilter() {
-  const [selected, setSelected] = useState<MaterialTag[]>([])
-
-  const toggle = (tag: MaterialTag) =>
-    setSelected((current) => (current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag]))
+export default function TagFilter({ tags, selected, onChange }: TagFilterProps) {
+  const toggle = (tag: string) =>
+    onChange(selected.includes(tag) ? selected.filter((t) => t !== tag) : [...selected, tag])
 
   const chipClass = (active: boolean) =>
     [
@@ -18,10 +19,10 @@ export default function TagFilter() {
   return (
     <div className="flex flex-wrap items-center gap-space-sm" role="group" aria-label="თაგები">
       <span className="mr-space-xs font-hand text-[22px] text-pen">თაგები:</span>
-      <button type="button" aria-pressed={selected.length === 0} onClick={() => setSelected([])} className={chipClass(selected.length === 0)}>
+      <button type="button" aria-pressed={selected.length === 0} onClick={() => onChange([])} className={chipClass(selected.length === 0)}>
         ყველა
       </button>
-      {MATERIAL_TAGS.map((tag) => (
+      {tags.map((tag) => (
         <button key={tag} type="button" aria-pressed={selected.includes(tag)} onClick={() => toggle(tag)} className={chipClass(selected.includes(tag))}>
           #{tag}
         </button>

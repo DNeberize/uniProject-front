@@ -28,9 +28,50 @@ export interface MaterialResponse {
   status: string
   uploader: UserSummary
   subjectName: string
+  likesCount: number
   tags: string[]
   createdAt: string
 }
+
+export interface Page<T> {
+  content: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+  last: boolean
+}
+
+/** Sort values the backend's SortOption enum accepts */
+export type MaterialSort = 'NEWEST' | 'LIKES'
+
+export interface MaterialSearchParams {
+  q?: string
+  tags?: string[]
+  sort?: MaterialSort
+  page?: number
+  size?: number
+}
+
+/** GET /materials/search: full-text search over approved materials, filtered by tags, paged */
+export function searchMaterials({ q, tags = [], sort = 'NEWEST', page = 0, size = 12 }: MaterialSearchParams, init?: RequestInit) {
+  const params = new URLSearchParams({ sort, page: String(page), size: String(size) })
+  if (q?.trim()) params.set('q', q.trim())
+  for (const tag of tags) params.append('tags', tag)
+  return apiFetch<Page<MaterialResponse>>(`/materials/search?${params}`, init)
+}
+
+export const getMaterials = (init?: RequestInit) => apiFetch<MaterialResponse[]>('/materials', init)
+
+/** The API has no GET /materials/{id} yet, so look the material up in the full list */
+export async function getMaterial(id: number, init?: RequestInit) {
+  return (await getMaterials(init)).find((m) => m.id === id) ?? null
+}
+
+export const getFavorites = (userId: string, init?: RequestInit) =>
+  apiFetch<MaterialResponse[]>(`/users/${encodeURIComponent(userId)}/favorites`, init)
+
+export const uploaderName = (user: UserSummary) => `${user.firstName} ${user.lastName}`.trim() || user.email
 
 // Standard types by extension: browsers disagree on some (Chrome on Windows reports .zip as
 // application/x-zip-compressed), and the S3 link is signed for exactly the type we send.

@@ -1,26 +1,27 @@
-import { useState } from 'react'
+import type { MaterialSort } from '../../api/materials.ts'
 
-type SortBy = 'date' | 'likes'
-
-const OPTIONS: { value: SortBy; label: string }[] = [
-  { value: 'date', label: 'უახლესი' },
-  { value: 'likes', label: 'ყველაზე მოწონებული' },
+const OPTIONS: { value: MaterialSort; label: string }[] = [
+  { value: 'NEWEST', label: 'უახლესი' },
+  { value: 'LIKES', label: 'ყველაზე მოწონებული' },
 ]
 
-export default function SortToggle() {
-  const [sortBy, setSortBy] = useState<SortBy>('date')
+type SortToggleProps = {
+  value: MaterialSort
+  onChange: (value: MaterialSort) => void
+}
 
+export default function SortToggle({ value, onChange }: SortToggleProps) {
   return (
     <div role="radiogroup" aria-label="სორტირება" className="flex items-center gap-space-xs">
       {OPTIONS.map((option) => {
-        const active = sortBy === option.value
+        const active = value === option.value
         return (
           <button
             key={option.value}
             type="button"
             role="radio"
             aria-checked={active}
-            onClick={() => setSortBy(option.value)}
+            onClick={() => onChange(option.value)}
             className={`cursor-pointer rounded px-space-sm py-1 font-label text-label-md transition-colors ${
               active ? 'font-semibold text-ink' : 'text-secondary hover:text-ink'
             }`}
