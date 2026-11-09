@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { getMaterial, uploaderName, type MaterialResponse } from '../api/materials.ts'
 import { useApi } from '../api/useApi.ts'
 import LikeButton from '../components/materials/LikeButton.tsx'
+import PdfPages from '../components/materials/PdfPages.tsx'
 import { dateFormat } from '../utils/format.ts'
-import { Underline } from '../components/notebook/Doodles.tsx'
+import { Arrow, Check, Underline } from '../components/notebook/Doodles.tsx'
 import Sheet from '../components/notebook/Sheet.tsx'
 import StickyNote from '../components/notebook/StickyNote.tsx'
 import Tape from '../components/notebook/Tape.tsx'
@@ -23,20 +25,39 @@ const initials = (material: MaterialResponse) =>
 
 const fileExtension = (url: string) => new URL(url, window.location.href).pathname.split('.').pop()?.toLowerCase() ?? ''
 
+type FileLink = { state: 'ok'; url: string } | { state: 'broken' } | { state: 'expired' }
+
+function checkFileLink(fileUrl: string | undefined): FileLink {
+  let url: URL
+  try {
+    url = new URL(fileUrl ?? '')
+  } catch {
+    return { state: 'broken' }
+  }
+  if (!['http:', 'https:'].includes(url.protocol) || url.origin === window.location.origin) return { state: 'broken' }
+
+  const signedAt = url.searchParams.get('X-Amz-Date')?.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/)
+  const lifetime = Number(url.searchParams.get('X-Amz-Expires'))
+  if (signedAt && lifetime) {
+    const [, y, mo, d, h, mi, s] = signedAt.map(Number)
+    if (Date.UTC(y, mo - 1, d, h, mi, s) + lifetime * 1000 < Date.now()) return { state: 'expired' }
+  }
+  return { state: 'ok', url: url.href }
+}
+
 export default function MaterialDetailsPage() {
   const { id } = useParams()
-  // The card passes the material along, so opening it from the list needs no extra request
   const passed = (useLocation().state as { material?: MaterialResponse } | null)?.material
   const materialId = Number(id)
 
-  const loaded = useApi(
-    (signal) => (passed?.id === materialId ? Promise.resolve(passed) : getMaterial(materialId, { signal })),
-    [materialId],
-  )
+  const loaded = useApi((signal) => getMaterial(materialId, { signal }), [materialId])
 
   if (!Number.isInteger(materialId) || (loaded.status === 'ready' && !loaded.data)) return <NotFoundPage />
 
-  const material = loaded.data
+  const fetched = loaded.data?.id === materialId ? loaded.data : undefined
+  const material = fetched ?? (passed?.id === materialId ? passed : undefined)
+  const fileLink = fetched && checkFileLink(fetched.fileUrl)
+  const fileUrl = fileLink?.state === 'ok' ? fileLink.url : undefined
 
   return (
     <section className="py-space-xl">
@@ -57,7 +78,7 @@ export default function MaterialDetailsPage() {
       {!material && loaded.status === 'loading' && <DetailsSkeleton />}
 
       {material && (
-        <div className="mt-space-lg grid gap-space-xl">
+        <div className="mt-space-lg grid min-w-0 grid-cols-[minmax(0,1fr)] gap-space-xl">
           <Sheet className="relative px-space-lg pb-space-lg pt-space-xl sm:px-space-xl">
             <Tape className="-top-3 left-1/2 w-24 -translate-x-1/2 -rotate-1" />
 
@@ -105,28 +126,143 @@ export default function MaterialDetailsPage() {
               </ul>
             )}
 
-            <a
-              href={material.fileUrl}
-              target="_blank"
-              rel="noreferrer"
-              download
-              className="btn-press mt-space-lg inline-flex h-12 items-center gap-space-sm rounded bg-primary px-space-lg font-label text-[15px] font-semibold text-on-primary hover:bg-[#c91f1f]"
-            >
-              <span className="material-symbols-outlined text-[20px]">download</span>
-              გადმოწერა
-            </a>
+            {fileUrl ? (
+              <DownloadButton fileUrl={fileUrl} title={material.title} />
+            ) : (
+              <span
+                aria-disabled="true"
+                className={`mt-space-lg inline-flex h-12 ${fileLink ? 'cursor-not-allowed' : 'cursor-wait'} items-center gap-space-sm rounded bg-primary/50 px-space-lg font-label text-[15px] font-semibold text-on-primary`}
+              >
+                <span className="material-symbols-outlined text-[20px]">download</span>
+                გადმოწერა
+              </span>
+            )}
           </Sheet>
 
-          <Preview material={material} />
+          {fileUrl ? (
+            <Preview material={material} fileUrl={fileUrl} />
+          ) : fileLink ? (
+            <BrokenFile expired={fileLink.state === 'expired'} />
+          ) : loaded.status === 'loading' && (
+            <div aria-busy="true" aria-label="იტვირთება…" className="sheet h-[50vh] animate-pulse bg-surface-container" />
+          )}
         </div>
       )}
     </section>
   )
 }
 
-function Preview({ material }: { material: MaterialResponse }) {
-  const isPdf = fileExtension(material.fileUrl) === 'pdf'
+const downloadName = (title: string, fileUrl: string) => {
+  const extension = fileExtension(fileUrl)
+  const base = title.replace(/[\\/:*?"<>|]+/g, '_').trim() || 'material'
+  return extension ? `${base}.${extension}` : base
+}
 
+function DownloadButton({ fileUrl, title }: { fileUrl: string; title: string }) {
+  const [busy, setBusy] = useState(false)
+
+  async function download() {
+    setBusy(true)
+    try {
+      const response = await fetch(fileUrl)
+      if (!response.ok) throw new Error(`download failed with ${response.status}`)
+      const href = URL.createObjectURL(await response.blob())
+      const link = Object.assign(document.createElement('a'), { href, download: downloadName(title, fileUrl) })
+      document.body.append(link)
+      link.click()
+      link.remove()
+      setTimeout(() => URL.revokeObjectURL(href), 60_000)
+    } catch {
+      window.open(fileUrl, '_blank', 'noreferrer')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={download}
+      disabled={busy}
+      aria-busy={busy}
+      className="btn-press mt-space-lg inline-flex h-12 items-center gap-space-sm rounded bg-primary px-space-lg font-label text-[15px] font-semibold text-on-primary hover:bg-[#c91f1f] disabled:cursor-wait disabled:opacity-70"
+    >
+      <span className={`material-symbols-outlined text-[20px] ${busy ? 'animate-bounce' : ''}`}>download</span>
+      {busy ? 'იტვირთება…' : 'გადმოწერა'}
+    </button>
+  )
+}
+
+const IMAGE_EXTENSIONS =['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'bmp', 'svg']
+const TEXT_EXTENSIONS = ['txt', 'md', 'csv', 'log', 'json']
+
+type PreviewKind = 'pdf' | 'image' | 'text' | 'none'
+
+function previewKind(fileUrl: string): PreviewKind {
+  const extension = fileExtension(fileUrl)
+  if (extension === 'pdf') return 'pdf'
+  if (IMAGE_EXTENSIONS.includes(extension)) return 'image'
+  if (TEXT_EXTENSIONS.includes(extension)) return 'text'
+  return 'none'
+}
+
+const browserShowsPdf = () =>
+  navigator.pdfViewerEnabled !== false && !window.matchMedia('(pointer: coarse)').matches
+
+const FRAME_HEIGHT = 'h-[calc(100dvh-7rem)] min-h-[360px]'
+
+function PreviewBody({ title, fileUrl }: { title: string; fileUrl: string }) {
+  const [failed, setFailed] = useState(false)
+  const kind = previewKind(fileUrl)
+
+  if (kind === 'pdf' && !failed) {
+    if (!browserShowsPdf()) return <PdfPages url={fileUrl} className={FRAME_HEIGHT} onError={() => setFailed(true)} />
+
+    return (
+      <iframe
+        title={`${title} — პრევიუ`}
+        src={`${fileUrl}#view=Fit&zoom=page-fit&navpanes=0`}
+        className={`block w-full rounded border border-outline bg-surface-container-low ${FRAME_HEIGHT}`}
+      />
+    )
+  }
+
+  if (kind === 'image' && !failed) {
+    return (
+      <img
+        src={fileUrl}
+        alt={title}
+        onError={() => setFailed(true)}
+        className="mx-auto block h-auto max-h-[calc(100dvh-7rem)] w-auto max-w-full rounded border border-outline bg-surface-container-low object-contain"
+      />
+    )
+  }
+
+  if (kind === 'text') {
+    return (
+      <iframe
+        title={`${title} — პრევიუ`}
+        src={fileUrl}
+        className={`block w-full rounded border border-outline bg-white ${FRAME_HEIGHT}`}
+      />
+    )
+  }
+
+  return (
+    <div className="mx-auto flex max-w-sm flex-col items-center gap-space-sm rounded border border-dashed border-outline bg-surface-container-low px-space-md py-space-xl text-center">
+      <span className="material-symbols-outlined text-[40px] text-secondary">
+        {failed ? (kind === 'image' ? 'broken_image' : 'picture_as_pdf') : 'description'}
+      </span>
+      <p className="text-body-md text-on-surface-variant">
+        {failed
+          ? `${kind === 'image' ? 'სურათი' : 'ფაილი'} ვერ ჩაიტვირთა — სცადე გადმოწერა ან ახალ ფანჯარაში გახსნა.`
+          : 'ამ ფაილის პრევიუ ბრაუზერში არ ჩანს — გადმოწერე და ისე გახსენი.'}
+      </p>
+    </div>
+  )
+}
+
+function Preview({ material, fileUrl }: { material: MaterialResponse; fileUrl: string }) {
   return (
     <div className="sheet rise relative border-t-4 border-t-primary px-space-md pb-space-lg pt-space-lg sm:px-space-xl">
       <div className="flex flex-wrap items-center justify-between gap-space-sm border-b border-outline-variant pb-space-md">
@@ -135,7 +271,7 @@ function Preview({ material }: { material: MaterialResponse }) {
           მასალის გადაფურცვლა
         </h2>
         <a
-          href={material.fileUrl}
+          href={fileUrl}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1 font-label text-label-md text-pen hover:underline"
@@ -145,22 +281,60 @@ function Preview({ material }: { material: MaterialResponse }) {
         </a>
       </div>
 
-      {isPdf ? (
-        <iframe
-          title={`${material.title} — პრევიუ`}
-          src={material.fileUrl}
-          className="mt-space-lg h-[75vh] min-h-[420px] w-full rounded border border-outline bg-surface-container-low"
-        />
-      ) : (
-        <div className="mt-space-lg flex flex-col items-center gap-space-sm rounded border border-dashed border-outline bg-surface-container-low px-space-md py-space-xl text-center">
-          <span className="material-symbols-outlined text-[40px] text-secondary">description</span>
-          <p className="text-body-md text-on-surface-variant">ამ ფაილის პრევიუ ბრაუზერში არ ჩანს — გადმოწერე და ისე გახსენი.</p>
-        </div>
-      )}
+      <div className="mt-space-lg">
+        <PreviewBody key={fileUrl} title={material.title} fileUrl={fileUrl} />
+      </div>
 
       <StickyNote title="📌 მინიშნება:" className="absolute -right-3 -top-6 hidden w-48 rotate-3 lg:block">
         <p>თუ პრევიუ არ ჩანს, გამოიყენე „გადმოწერა“.</p>
       </StickyNote>
+    </div>
+  )
+}
+
+function BrokenFile({ expired }: { expired: boolean }) {
+  return (
+    <div className="flex flex-col items-start gap-space-xl md:flex-row md:items-center">
+      <Sheet taped className="w-full max-w-md px-space-lg pb-space-lg pt-space-xl sm:px-space-xl">
+        <p className="font-hand text-[88px] font-bold leading-none text-primary -rotate-3">{expired ? '⌛' : '404'}</p>
+        <p className="mt-space-md text-body-lg text-on-surface-variant">
+          {expired
+            ? 'ფაილის ბმულს ვადა გაუვიდა. განაახლე გვერდი და ახალი ბმული ჩაიტვირთება.'
+            : 'ამ მასალის ფაილი ვერ მოიძებნა. შეიძლება ბმული არასწორია ან ფაილი წაიშალა.'}
+        </p>
+        {expired ? (
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="btn-press mt-space-lg inline-flex h-11 items-center rounded bg-primary px-space-lg font-label text-[15px] font-semibold text-on-primary hover:bg-[#c91f1f]"
+          >
+            გვერდის განახლება
+          </button>
+        ) : (
+          <Link
+            to={ROUTES.home}
+            className="btn-press mt-space-lg inline-flex h-11 items-center rounded bg-primary px-space-lg font-label text-[15px] font-semibold text-on-primary hover:bg-[#c91f1f]"
+          >
+            მთავარ გვერდზე დაბრუნება
+          </Link>
+        )}
+      </Sheet>
+
+      <div className="flex items-center gap-space-md">
+        <Arrow className="hidden h-16 w-28 -scale-x-100 text-pen md:block" delay={0.4} />
+        <StickyNote title={expired ? 'ბმული მოძველდა' : 'ფაილი ვერ ჩაიტვირთა'} className="w-60 rotate-2">
+          <ul className="grid gap-2">
+            <li className="flex items-start gap-2">
+              <Check checked className="mt-0.5 h-[18px] w-[18px] shrink-0" delay={0.6} />
+              {expired ? 'განაახლე გვერდი' : 'სცადე მოგვიანებით'}
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="mt-0.5 h-[18px] w-[18px] shrink-0" />
+              მოძებნე სხვა მასალა მთავარ გვერდზე
+            </li>
+          </ul>
+        </StickyNote>
+      </div>
     </div>
   )
 }

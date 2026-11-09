@@ -63,9 +63,13 @@ export function searchMaterials({ q, tags = [], sort = 'NEWEST', page = 0, size 
 
 export const getMaterials = (init?: RequestInit) => apiFetch<MaterialResponse[]>('/materials', init)
 
-/** The API has no GET /materials/{id} yet, so look the material up in the full list */
 export async function getMaterial(id: number, init?: RequestInit) {
-  return (await getMaterials(init)).find((m) => m.id === id) ?? null
+  try {
+    return await apiFetch<MaterialResponse>(`/materials/${id}`, init)
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null
+    throw error
+  }
 }
 
 export const getFavorites = (userId: string, init?: RequestInit) =>
