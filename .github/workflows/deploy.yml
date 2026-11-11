@@ -12,6 +12,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # SCP only adds and overwrites files, so anything deleted from the repo would linger on the
+      # server and still be compiled. Clear the source folders first. (Not scp's `rm: true`: that
+      # wipes the whole target, including the Dockerfile and docker-compose.yml that live only there.)
+      - name: Remove old source files on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.EC2_USER }}/uniProject/uniProject-front
+            rm -rf src public scripts
+
       - name: Copy files to EC2 via SCP
         uses: appleboy/scp-action@master
         with:
