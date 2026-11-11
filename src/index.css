@@ -297,9 +297,14 @@ html:not(.icons-ready) .material-symbols-outlined {
   background: rgb(255 255 255 / 0.55);
 }
 
+/*
+ * The swipe is one box from the phrase's start to its end, so a phrase split over two lines got a
+ * thin sliver instead of a highlight: keep highlighted phrases (always short) on one line.
+ */
 .highlight {
   position: relative;
   z-index: 0;
+  white-space: nowrap;
   color: inherit;
   background: none;
 }

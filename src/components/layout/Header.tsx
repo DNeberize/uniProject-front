@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router'
+import { LOGO } from '../../config/logo.ts'
 import { HEADER_NAV, ROUTES } from '../../config/routes.ts'
 import MenuIcon from './MenuIcon.tsx'
 import UserMenu from './UserMenu.tsx'
@@ -34,7 +35,16 @@ export default function Header() {
       <header className="fixed top-0 z-50 w-full border-b border-outline-variant bg-paper/95 backdrop-blur-sm">
         <div className="flex h-16 w-full items-center justify-between gap-space-sm px-gutter sm:gap-space-md lg:px-gutter-desktop">
           <Link to={ROUTES.home} className="flex min-w-0 items-center gap-space-sm sm:gap-space-md">
-            <img src="/logo.png" alt="SANGU" width={144} height={144} fetchPriority="high" className="h-8 w-auto shrink-0 object-contain sm:h-9" />
+            <img
+              src={LOGO.src}
+              srcSet={LOGO.srcSet}
+              sizes={LOGO.sizes}
+              alt="SANGU"
+              width={144}
+              height={144}
+              fetchPriority="high"
+              className="h-8 w-auto shrink-0 object-contain sm:h-9"
+            />
             <div className="flex min-w-0 flex-col">
               <span className="truncate font-headline text-[15px] font-semibold leading-5 tracking-tight text-ink sm:text-headline-sm">
                 SANGU NoteBase

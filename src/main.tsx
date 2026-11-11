@@ -5,6 +5,7 @@ import './index.css'
 import { prefetchGet } from './api/client.ts'
 import { homeSearch, searchMaterialsPath } from './api/materials.ts'
 import { loadCurrentUser } from './auth/useCurrentUser.ts'
+import { LOGO } from './config/logo.ts'
 import { ROUTES } from './config/routes.ts'
 import { prefetchPages, router } from './router.tsx'
 
@@ -44,13 +45,15 @@ function prefetchLandingData() {
 }
 prefetchLandingData()
 
-// The signed-in user is on every page (header, profile card). Waiting for it, briefly, means those render
-// complete instead of as a skeleton that grows a moment later and pushes the page down.
+// Start loading the signed-in user now. Only the profile page waits for it before the first render: there
+// the profile card would otherwise grow from a skeleton and push the page down. Elsewhere the user only
+// fills the fixed header's chip, which moves nothing, so those pages paint without waiting on the API.
 const USER_WAIT_MS = 1500
-const userReady = Promise.race([
-  loadCurrentUser().catch(() => {}), // not signed in: the header shows that itself
-  new Promise((resolve) => setTimeout(resolve, USER_WAIT_MS)),
-])
+const PAGES_NEEDING_USER: string[] = [ROUTES.profile]
+const user = loadCurrentUser().catch(() => {}) // not signed in: the header shows that itself
+const userReady = PAGES_NEEDING_USER.includes(window.location.pathname)
+  ? Promise.race([user, new Promise((resolve) => setTimeout(resolve, USER_WAIT_MS))])
+  : undefined
 
 // Reveal icons only once their font is in, even if that happens after the first render
 document.fonts.load(ICON_FONT, 'search').then(
@@ -58,21 +61,24 @@ document.fonts.load(ICON_FONT, 'search').then(
   () => {},
 )
 
-const loadImage = (src: string) =>
+// Same srcset/sizes as the header, so the browser waits for (and caches) the exact file the header shows
+const loadImage = ({ src, srcSet, sizes }: { src: string; srcSet?: string; sizes?: string }) =>
   new Promise<void>((resolve) => {
     const img = new Image()
     img.onload = img.onerror = () => resolve()
+    if (sizes) img.sizes = sizes
+    if (srcSet) img.srcset = srcSet
     img.src = src
   })
 
-// Wait for fonts, the logo and the user before the first render so nothing reflows on load.
+// Wait for fonts, the logo (and on the profile page the user) before the first render so nothing reflows on load.
 // Capped so a slow or offline network never keeps the page blank.
 async function assetsReady(timeoutMs = 3000) {
   const fonts = PAGES_WITH_SYMBOLS.includes(window.location.pathname) ? [...FONTS, ...SYMBOL_FONTS] : FONTS
   const assets = Promise.allSettled([
     ...fonts.map(([font, sample]) => document.fonts.load(font, sample)),
     document.fonts.load(ICON_FONT, 'search'),
-    loadImage('/logo.png'),
+    loadImage(LOGO),
     userReady,
   ])
   await Promise.race([assets, new Promise((resolve) => setTimeout(resolve, timeoutMs))])
