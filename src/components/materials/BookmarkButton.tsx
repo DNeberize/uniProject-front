@@ -25,9 +25,7 @@ export default function BookmarkButton({ initialSaved = false, className = '' }:
       className={`group/bookmark absolute -top-px right-4 z-10 flex h-12 w-9 cursor-pointer justify-center ${className}`}
     >
       <span className="sr-only">შენახვა</span>
-      <span aria-hidden="true" className={`bookmark-ribbon ${saved ? 'is-saved' : ''}`}>
-        <span className="material-symbols-outlined icon-filled bookmark-ribbon__icon text-[14px]">bookmark</span>
-      </span>
+      <span aria-hidden="true" className={`bookmark-ribbon ${saved ? 'is-saved' : ''}`} />
     </button>
   )
 }
