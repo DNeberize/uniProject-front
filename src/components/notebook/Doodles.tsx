@@ -47,10 +47,14 @@ export function Bulb({ className = '', delay = 0 }: DoodleProps) {
   )
 }
 
-/** Curved arrow pointing right. Flip with `-scale-x-100` to point left. */
-export function Arrow({ className = '', delay = 0 }: DoodleProps) {
+/**
+ * Curved arrow pointing right. Flip with `-scale-x-100` to point left.
+ * The stroke is in viewBox units (200 wide), so it thins out as the arrow shrinks: pass a
+ * heavier `strokeWidth` for small arrows to keep the pen line about 2px on screen.
+ */
+export function Arrow({ className = '', delay = 0, strokeWidth }: DoodleProps & { strokeWidth?: number }) {
   return (
-    <svg aria-hidden="true" viewBox="0 0 200 120" className={`doodle ${className}`} style={delayStyle(delay)}>
+    <svg aria-hidden="true" viewBox="0 0 200 120" className={`doodle ${className}`} style={{ ...delayStyle(delay), strokeWidth }}>
       <path pathLength={1} d="M8 4c-4 34 10 66 46 84 36 18 86 16 136 0" />
       <path pathLength={1} d="M174 76l17 12-15 14" />
     </svg>

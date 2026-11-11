@@ -47,13 +47,6 @@ export default function MyMaterialRow({ material }: { material: MyMaterial }) {
           <div className="flex flex-col items-end gap-1.5">
             <StatusBadge status={material.status} />
 
-            {material.status === 'APPROVED' && material.rating !== undefined && (
-              <p className="flex items-center gap-1 text-body-sm text-secondary">
-                <span aria-hidden="true" className="text-status-pending">★</span>
-                <span className="font-semibold text-ink">{material.rating}</span>
-                <span>({material.ratingCount})</span>
-              </p>
-            )}
             {material.status === 'PENDING' && (
               <p className="font-hand text-[18px] font-bold text-pen">ელოდება მოდერატორს ✎</p>
             )}

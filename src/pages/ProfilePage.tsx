@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
+import type { MaterialResponse } from '../api/materials.ts'
+import { useFavorites } from '../api/useFavorites.ts'
 import { ROUTES } from '../config/routes.ts'
 import PageContainer from '../components/layout/PageContainer.tsx'
+import MaterialCard from '../components/materials/MaterialCard.tsx'
+import MaterialGridSkeleton from '../components/materials/MaterialGridSkeleton.tsx'
 import StickyNote from '../components/notebook/StickyNote.tsx'
 import Tape from '../components/notebook/Tape.tsx'
 import MyMaterialRow from '../components/profile/MyMaterialRow.tsx'
 import ProfileCard from '../components/profile/ProfileCard.tsx'
 import ProfileStats from '../components/profile/ProfileStats.tsx'
 import ProfileTabs, { type ProfileTabId } from '../components/profile/ProfileTabs.tsx'
-import SavedMaterialCard from '../components/profile/SavedMaterialCard.tsx'
 import StatusFilter, { type StatusFilterValue } from '../components/profile/StatusFilter.tsx'
-import { MOCK_MY_MATERIALS, MOCK_PROFILE_DETAILS, MOCK_SAVED_MATERIALS } from '../mocks/profile.ts'
+import { MOCK_MY_MATERIALS, MOCK_PROFILE_DETAILS } from '../mocks/profile.ts'
 
 const countByStatus = (status: StatusFilterValue) =>
   status === 'ALL' ? MOCK_MY_MATERIALS.length : MOCK_MY_MATERIALS.filter((m) => m.status === status).length
@@ -25,6 +28,9 @@ const COUNTS: Record<StatusFilterValue, number> = {
 export default function ProfilePage() {
   const [tab, setTab] = useState<ProfileTabId>('uploads')
   const [filter, setFilter] = useState<StatusFilterValue>('ALL')
+
+  const favorites = useFavorites()
+  const saved = favorites.data ?? []
 
   const materials = filter === 'ALL' ? MOCK_MY_MATERIALS : MOCK_MY_MATERIALS.filter((m) => m.status === filter)
 
@@ -52,8 +58,6 @@ export default function ProfilePage() {
               approved={COUNTS.APPROVED}
               pending={COUNTS.PENDING}
               rejected={COUNTS.REJECTED}
-              averageRating={MOCK_PROFILE_DETAILS.averageRating}
-              ratingCount={MOCK_PROFILE_DETAILS.ratingCount}
             />
           </div>
         </div>
@@ -63,9 +67,8 @@ export default function ProfilePage() {
             active={tab}
             onChange={setTab}
             tabs={[
-              { id: 'uploads', label: 'ჩემი ატვირთვები', count: COUNTS.ALL },
-              { id: 'saved', label: '🔖 შენახული მასალები', count: MOCK_SAVED_MATERIALS.length },
-              { id: 'comments', label: '💬 კომენტარები', hideOnMobile: true },
+              { id: 'uploads', label: 'ჩემი ატვირთვები', shortLabel: 'ატვირთვები', icon: 'upload', count: COUNTS.ALL },
+              { id: 'saved', label: 'შენახული მასალები', shortLabel: 'შენახული', icon: 'bookmark', count: favorites.data?.length },
             ]}
           />
 
@@ -111,37 +114,52 @@ export default function ProfilePage() {
             )}
 
             {tab === 'saved' && (
-              <div className="grid gap-space-lg pt-space-sm md:grid-cols-3">
-                {MOCK_SAVED_MATERIALS.map((material, index) => (
-                  <SavedMaterialCard key={material.id} material={material} index={index} />
-                ))}
-              </div>
-            )}
-
-            {tab === 'comments' && (
-              <p className="py-space-xl text-center font-hand text-[22px] text-secondary">კომენტარები მალე დაემატება ✎</p>
+              <>
+                {favorites.failed && (
+                  <p className="py-space-xl text-center font-hand text-[22px] text-secondary">შენახული მასალები ვერ ჩაიტვირთა</p>
+                )}
+                {!favorites.failed && favorites.status === 'loading' && <MaterialGridSkeleton count={2} />}
+                {favorites.status === 'ready' && saved.length === 0 && (
+                  <div className="py-space-xl text-center">
+                    <p className="font-hand text-[22px] text-secondary">შენახული მასალა ჯერ არ გაქვს</p>
+                    <Link to={ROUTES.home} className="mt-1 inline-block font-hand text-[20px] font-bold text-pen hover:underline">
+                      მასალების ნახვა →
+                    </Link>
+                  </div>
+                )}
+                {saved.length > 0 && <SavedGrid materials={saved} />}
+              </>
             )}
           </div>
         </div>
 
-        <section className="mt-space-xl pt-space-md">
-          <div className="mb-space-md flex flex-wrap items-center justify-between gap-2">
-            <h2 className="flex flex-wrap items-baseline gap-2 font-headline text-headline-md text-ink">
-              შენახული მასალები
-              <span className="font-hand text-[19px] font-bold text-pen">~ სწრაფი წვდომა</span>
-            </h2>
-            <Link to={ROUTES.favorites} className="font-hand text-[19px] font-bold text-pen hover:underline">
-              ყველას ნახვა ({MOCK_SAVED_MATERIALS.length}) →
-            </Link>
-          </div>
+        {saved.length > 0 && (
+          <section className="mt-space-xl pt-space-md">
+            <div className="mb-space-md flex flex-wrap items-center justify-between gap-2">
+              <h2 className="flex flex-wrap items-baseline gap-2 font-headline text-headline-md text-ink">
+                შენახული მასალები
+                <span className="font-hand text-[19px] font-bold text-pen">~ სწრაფი წვდომა</span>
+              </h2>
+              <Link to={ROUTES.favorites} className="font-hand text-[19px] font-bold text-pen hover:underline">
+                ყველას ნახვა ({saved.length}) →
+              </Link>
+            </div>
 
-          <div className="grid gap-space-lg md:grid-cols-3">
-            {MOCK_SAVED_MATERIALS.map((material, index) => (
-              <SavedMaterialCard key={material.id} material={material} index={index} />
-            ))}
-          </div>
-        </section>
+            <SavedGrid materials={saved.slice(0, 3)} />
+          </section>
+        )}
       </div>
     </PageContainer>
+  )
+}
+
+/** Bookmarked materials, as the same cards the home page uses. */
+function SavedGrid({ materials }: { materials: MaterialResponse[] }) {
+  return (
+    <div className="grid gap-x-space-lg gap-y-space-xl pt-space-sm sm:grid-cols-2 xl:grid-cols-3">
+      {materials.map((material, index) => (
+        <MaterialCard key={material.id} material={material} index={index} saved />
+      ))}
+    </div>
   )
 }

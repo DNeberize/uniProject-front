@@ -10,7 +10,7 @@ type StatusFilterProps = {
 
 const OPTIONS: { value: StatusFilterValue; label: string }[] = [
   { value: 'ALL', label: 'ყველა' },
-  { value: 'APPROVED', label: 'დამტკიცებული' },
+  { value: 'APPROVED', label: 'დადასტურებული' },
   { value: 'PENDING', label: 'მოლოდინში' },
   { value: 'REJECTED', label: 'უარყოფილი' },
 ]

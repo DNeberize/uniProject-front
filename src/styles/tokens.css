@@ -11,12 +11,18 @@
 
 @theme {
   /* ---------- Fonts ---------- */
-  /* Geist has no Georgian letters, so Georgian text falls through to Noto Sans Georgian */
+  /*
+   * Three web fonts only (plus the icon font), to keep the first load light:
+   *   Noto Sans Georgian  - main font for body and labels (has its own Latin letters too)
+   *   Noto Serif Georgian - headlines
+   *   Caveat              - the fun handwritten one (Latin and digits; Georgian falls back to Noto Sans)
+   * Code-style labels use the system monospace, which needs no download.
+   */
   --font-headline: "Noto Serif Georgian", Georgia, "Times New Roman", serif;
-  --font-body: "Geist", "Noto Sans Georgian", ui-sans-serif, system-ui, sans-serif;
-  --font-label: "Geist", "Noto Sans Georgian", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Noto Sans Georgian", ui-sans-serif, system-ui, sans-serif;
+  --font-label: "Noto Sans Georgian", ui-sans-serif, system-ui, sans-serif;
   --font-hand: "Caveat", "Noto Sans Georgian", cursive;
-  --font-code: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Georgian", monospace;
 
   /* ---------- Type scale ---------- */
   --text-headline-xl: 48px;

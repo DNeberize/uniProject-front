@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { getMaterial, uploaderName, type MaterialResponse } from '../api/materials.ts'
 import { useApi } from '../api/useApi.ts'
+import BookmarkButton from '../components/materials/BookmarkButton.tsx'
 import LikeButton from '../components/materials/LikeButton.tsx'
 import PdfPages from '../components/materials/PdfPages.tsx'
+import UserAvatar from '../components/UserAvatar.tsx'
 import { dateFormat } from '../utils/format.ts'
 import { Arrow, Check, Underline } from '../components/notebook/Doodles.tsx'
 import Sheet from '../components/notebook/Sheet.tsx'
@@ -19,9 +21,6 @@ const TAG_COLORS = [
   'border-status-approved-border bg-status-approved-bg text-status-approved',
   'border-primary/30 bg-primary-container text-on-primary-container',
 ]
-
-const initials = (material: MaterialResponse) =>
-  `${material.uploader.firstName.charAt(0)}${material.uploader.lastName.charAt(0)}` || material.uploader.email.charAt(0)
 
 const fileExtension = (url: string) => new URL(url, window.location.href).pathname.split('.').pop()?.toLowerCase() ?? ''
 
@@ -81,12 +80,18 @@ export default function MaterialDetailsPage() {
         <div className="mt-space-lg grid min-w-0 grid-cols-[minmax(0,1fr)] gap-space-xl">
           <Sheet className="relative px-space-lg pb-space-lg pt-space-xl sm:px-space-xl">
             <Tape className="-top-3 left-1/2 w-24 -translate-x-1/2 -rotate-1" />
+            <BookmarkButton />
 
-            <div className="flex flex-wrap items-center justify-between gap-space-sm">
+            {/* Right padding keeps the like button clear of the bookmark ribbon */}
+            <div className="flex flex-wrap items-center justify-between gap-space-sm pr-8 sm:pr-4">
               <span className="rounded border border-outline bg-surface-container-low px-2.5 py-1 font-label text-label-md text-ink">
                 {material.subjectName}
               </span>
-              <LikeButton initialCount={material.likesCount} />
+              <LikeButton
+                materialId={material.id}
+                initialLiked={material.isLikedByCurrentUser}
+                initialCount={material.likesCount}
+              />
             </div>
 
             <h1 className="mt-space-md font-headline text-headline-lg-mobile text-ink md:text-headline-lg">
@@ -104,9 +109,7 @@ export default function MaterialDetailsPage() {
 
             <div className="mt-space-lg flex flex-wrap items-center justify-between gap-space-sm border-t border-outline-variant pt-space-md">
               <div className="flex min-w-0 items-center gap-space-sm">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-status-pending-border bg-status-pending-bg font-label text-label-sm text-status-pending">
-                  {initials(material)}
-                </span>
+                <UserAvatar user={material.uploader} />
                 <span className="truncate font-label text-label-md text-ink">{uploaderName(material.uploader)}</span>
                 <span className="hidden truncate font-code text-code-sm text-secondary sm:inline">({material.uploader.email})</span>
               </div>
@@ -341,12 +344,16 @@ function BrokenFile({ expired }: { expired: boolean }) {
 
 function DetailsSkeleton() {
   return (
-    <div aria-busy="true" aria-label="იტვირთება…" className="sheet mt-space-lg grid animate-pulse gap-space-md px-space-lg pb-space-lg pt-space-xl sm:px-space-xl">
-      <div className="h-6 w-40 rounded bg-surface-container-high" />
-      <div className="h-9 w-3/4 rounded bg-surface-container-high" />
-      <div className="h-16 w-full rounded bg-surface-container" />
-      <div className="h-4 w-56 rounded bg-surface-container-high" />
-      <div className="h-12 w-40 rounded bg-surface-container-high" />
+    // The loaded page (details + file preview) is always taller than the screen, so the skeleton reserves
+    // a screenful too: otherwise the footer sits in view while loading and then jumps down (layout shift).
+    <div className="min-h-dvh">
+      <div aria-busy="true" aria-label="იტვირთება…" className="sheet mt-space-lg grid animate-pulse gap-space-md px-space-lg pb-space-lg pt-space-xl sm:px-space-xl">
+        <div className="h-6 w-40 rounded bg-surface-container-high" />
+        <div className="h-9 w-3/4 rounded bg-surface-container-high" />
+        <div className="h-16 w-full rounded bg-surface-container" />
+        <div className="h-4 w-56 rounded bg-surface-container-high" />
+        <div className="h-12 w-40 rounded bg-surface-container-high" />
+      </div>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router'
 import { getTags } from '../api/catalog.ts'
-import { searchMaterials, type MaterialSort } from '../api/materials.ts'
+import { HOME_PAGE_SIZE, homeSearch, searchMaterials, type MaterialSort } from '../api/materials.ts'
 import { useApi } from '../api/useApi.ts'
 import SearchBar from '../components/home/SearchBar.tsx'
 import SortToggle from '../components/home/SortToggle.tsx'
@@ -13,15 +13,10 @@ import { Arrow } from '../components/notebook/Doodles.tsx'
 import Highlight from '../components/notebook/Highlight.tsx'
 import StickyNote from '../components/notebook/StickyNote.tsx'
 
-const PAGE_SIZE = 12
-
 export default function HomePage() {
   // Search state lives in the URL, so results can be shared and survive back/forward
   const [params, setParams] = useSearchParams()
-  const q = params.get('q') ?? ''
-  const selectedTags = params.getAll('tags')
-  const sort: MaterialSort = params.get('sort') === 'LIKES' ? 'LIKES' : 'NEWEST'
-  const page = Math.max(0, Number(params.get('page')) || 0)
+  const { q, tags: selectedTags, sort, page } = homeSearch(params)
 
   const update = (changes: { q?: string; tags?: string[]; sort?: MaterialSort; page?: number }) => {
     const next = { q, tags: selectedTags, sort, page: 0, ...changes }
@@ -35,7 +30,7 @@ export default function HomePage() {
 
   const tags = useApi(() => getTags(), [])
   const results = useApi(
-    (signal) => searchMaterials({ q, tags: selectedTags, sort, page, size: PAGE_SIZE }, { signal }),
+    (signal) => searchMaterials({ q, tags: selectedTags, sort, page, size: HOME_PAGE_SIZE }, { signal }),
     [q, selectedTags.join('\u0000'), sort, page],
   )
 
@@ -64,7 +59,7 @@ export default function HomePage() {
           {isFiltered ? 'ძიების შედეგები' : 'ბოლოს დამატებული'}
           {!isFiltered && (
             <span className="pointer-events-none absolute -right-28 -top-5 hidden items-start gap-1 md:flex">
-              <Arrow className="h-8 w-14 -scale-x-100 rotate-[200deg] text-pen" delay={0.6} />
+              <Arrow className="h-8 w-14 -scale-x-100 rotate-[200deg] text-pen" delay={0.6} strokeWidth={7} />
               <span className="font-hand text-[20px] leading-none text-pen">ახალი!</span>
             </span>
           )}

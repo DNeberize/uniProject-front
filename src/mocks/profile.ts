@@ -11,22 +11,8 @@ export type MyMaterial = {
   subjectCode: string
   uploadDate: string
   status: MaterialStatus
-  /** Only approved materials have ratings */
-  rating?: number
-  ratingCount?: number
   /** Only rejected materials have a moderator note */
   rejectionReason?: string
-}
-
-/** A material the current user bookmarked. */
-export type SavedMaterial = {
-  id: number
-  title: string
-  subjectCode: string
-  uploader: string
-  uploadDate: string
-  rating: number
-  ratingCount: number
 }
 
 /** Profile fields the /api/auth response does not include yet. */
@@ -34,8 +20,6 @@ export const MOCK_PROFILE_DETAILS = {
   studentId: '84910',
   faculty: 'ინფორმატიკა და ინჟინერია',
   semester: '2024-2025',
-  averageRating: 4.7,
-  ratingCount: 42,
 }
 
 export const MOCK_MY_MATERIALS: MyMaterial[] = [
@@ -46,8 +30,6 @@ export const MOCK_MY_MATERIALS: MyMaterial[] = [
     subjectCode: 'CS-204',
     uploadDate: '2025-02-14',
     status: 'APPROVED',
-    rating: 4.8,
-    ratingCount: 12,
   },
   {
     id: 102,
@@ -73,8 +55,6 @@ export const MOCK_MY_MATERIALS: MyMaterial[] = [
     subjectCode: 'MATH-101',
     uploadDate: '2025-01-22',
     status: 'APPROVED',
-    rating: 4.9,
-    ratingCount: 18,
   },
   {
     id: 105,
@@ -83,8 +63,6 @@ export const MOCK_MY_MATERIALS: MyMaterial[] = [
     subjectCode: 'NET-220',
     uploadDate: '2025-01-15',
     status: 'APPROVED',
-    rating: 4.6,
-    ratingCount: 7,
   },
   {
     id: 106,
@@ -93,35 +71,5 @@ export const MOCK_MY_MATERIALS: MyMaterial[] = [
     subjectCode: 'DB-201',
     uploadDate: '2025-02-20',
     status: 'PENDING',
-  },
-]
-
-export const MOCK_SAVED_MATERIALS: SavedMaterial[] = [
-  {
-    id: 201,
-    title: 'ალგორითმები II - დინამიური დაპროგრამების სრული ლექციების კრებული',
-    subjectCode: 'CS-301',
-    uploader: 'ნინო ახვლედიანი',
-    uploadDate: '2025-02-08',
-    rating: 4.8,
-    ratingCount: 29,
-  },
-  {
-    id: 202,
-    title: 'საკონსტიტუციო სამართალი - კაზუსების ამოხსნის მეთოდოლოგია',
-    subjectCode: 'LAW-110',
-    uploader: 'სანდრო გაბუნია',
-    uploadDate: '2025-01-11',
-    rating: 4.9,
-    ratingCount: 22,
-  },
-  {
-    id: 203,
-    title: 'მიკროეკონომიკის საფუძვლები - გრაფიკები და საგამოცდო ტესტები',
-    subjectCode: 'ECON-101',
-    uploader: 'მარიამ გელოვანი',
-    uploadDate: '2025-01-27',
-    rating: 4.7,
-    ratingCount: 52,
   },
 ]

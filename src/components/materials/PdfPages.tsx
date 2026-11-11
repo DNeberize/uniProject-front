@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist'
+import { afterFirstPaint } from '../../utils/firstPaint.ts'
 
 async function loadPdfJs() {
+  // pdf.js (~130 KB) plus its worker (~1.2 MB) would otherwise compete with the page's own first paint
+  await afterFirstPaint
   const [pdfjs, worker] = await Promise.all([import('pdfjs-dist'), import('pdfjs-dist/build/pdf.worker.min.mjs?url')])
   pdfjs.GlobalWorkerOptions.workerSrc = worker.default
   return pdfjs

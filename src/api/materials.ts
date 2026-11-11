@@ -1,4 +1,4 @@
-import { ApiError, apiFetch } from './client.ts'
+import { ApiError, apiFetch, apiSend, putToStorage } from './client.ts'
 
 export interface UserSummary {
   keycloakId: string
@@ -29,6 +29,8 @@ export interface MaterialResponse {
   uploader: UserSummary
   subjectName: string
   likesCount: number
+  /** Missing when nobody is signed in */
+  isLikedByCurrentUser?: boolean
   tags: string[]
   createdAt: string
 }
@@ -53,13 +55,30 @@ export interface MaterialSearchParams {
   size?: number
 }
 
-/** GET /materials/search: full-text search over approved materials, filtered by tags, paged */
-export function searchMaterials({ q, tags = [], sort = 'NEWEST', page = 0, size = 12 }: MaterialSearchParams, init?: RequestInit) {
+/** Materials per page on the home page */
+export const HOME_PAGE_SIZE = 12
+
+/** The home page's search, read from its URL (?q=&tags=&sort=&page=) */
+export function homeSearch(params: URLSearchParams) {
+  return {
+    q: params.get('q') ?? '',
+    tags: params.getAll('tags'),
+    sort: (params.get('sort') === 'LIKES' ? 'LIKES' : 'NEWEST') as MaterialSort,
+    page: Math.max(0, Number(params.get('page')) || 0),
+    size: HOME_PAGE_SIZE,
+  }
+}
+
+export function searchMaterialsPath({ q, tags = [], sort = 'NEWEST', page = 0, size = HOME_PAGE_SIZE }: MaterialSearchParams) {
   const params = new URLSearchParams({ sort, page: String(page), size: String(size) })
   if (q?.trim()) params.set('q', q.trim())
   for (const tag of tags) params.append('tags', tag)
-  return apiFetch<Page<MaterialResponse>>(`/materials/search?${params}`, init)
+  return `/materials/search?${params}`
 }
+
+/** GET /materials/search: full-text search over approved materials, filtered by tags, paged */
+export const searchMaterials = (search: MaterialSearchParams, init?: RequestInit) =>
+  apiFetch<Page<MaterialResponse>>(searchMaterialsPath(search), init)
 
 export const getMaterials = (init?: RequestInit) => apiFetch<MaterialResponse[]>('/materials', init)
 
@@ -74,6 +93,9 @@ export async function getMaterial(id: number, init?: RequestInit) {
 
 export const getFavorites = (userId: string, init?: RequestInit) =>
   apiFetch<MaterialResponse[]>(`/users/${encodeURIComponent(userId)}/favorites`, init)
+
+/** POST /materials/{id}/like: toggles the current user's like (adds it, or removes it if already there) */
+export const toggleLike = (materialId: number) => apiSend(`/materials/${materialId}/like`, { method: 'POST' })
 
 export const uploaderName = (user: UserSummary) => `${user.firstName} ${user.lastName}`.trim() || user.email
 
@@ -91,17 +113,11 @@ export function contentTypeOf(file: File) {
   return CONTENT_TYPES[extension] ?? (file.type || 'application/octet-stream')
 }
 
-/** Step 1: ask the backend for a presigned S3 link (valid for 10 minutes) */
+/** Step 1 (step 2 is putToStorage): ask the backend for a presigned S3 link (valid for 10 minutes) */
 export const getUploadUrl = (file: File, contentType: string) =>
   apiFetch<PresignedUrl>(
     `/materials/upload-url?${new URLSearchParams({ fileName: file.name, contentType, fileSize: String(file.size) })}`,
   )
-
-/** Step 2: PUT the file straight to S3. Not through apiFetch: it is not our API and returns no JSON. */
-export async function putToStorage(uploadUrl: string, file: File, contentType: string) {
-  const response = await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': contentType } })
-  if (!response.ok) throw new ApiError(response.status, `PUT to storage failed with ${response.status}`)
-}
 
 /** Step 3: tell the backend the file is on S3 so it saves the material */
 export const confirmUpload = (material: MaterialCreate) =>

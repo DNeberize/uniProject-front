@@ -1,7 +1,7 @@
 import type { IncomingMessage } from 'node:http'
-import type { Plugin } from 'vite'
+import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
 
-// Dev-only: lets `npm run dev` on localhost talk to the protected backend.
+// Local only: lets `npm run dev` (and `npm run preview`) on localhost talk to the protected backend.
 //
 // In production nginx and the Spring gateway send you through Keycloak and the
 // gateway sets an HttpOnly `SESSION` cookie on `.chemilabi.trade`, which a page on
@@ -113,48 +113,49 @@ export function devAuth(options: DevAuthOptions): Plugin {
     return session
   }
 
+  const proxy = {
+    '/api': {
+      target: options.backendUrl,
+      changeOrigin: true,
+      configure: (proxyServer: { on: (event: 'proxyRes', listener: (res: IncomingMessage) => void) => void }) => {
+        // An expired session comes back as 401: drop it so the next call signs in again
+        proxyServer.on('proxyRes', (res) => {
+          if (res.statusCode === 401 && canSignIn) session = undefined
+        })
+      },
+    },
+  }
+
+  // Runs before Vite's own middlewares, so headers are set before the proxy forwards them
+  const attachSession = (server: ViteDevServer | PreviewServer) => {
+    if (!canSignIn && !options.session) {
+      console.warn('[dev-auth] no credentials in .env.local, /api calls will get 401. See .env.example')
+      return
+    }
+
+    server.middlewares.use(async (req: IncomingMessage, res, next) => {
+      if (!req.url?.startsWith('/api')) return next()
+      try {
+        req.headers.cookie = `SESSION=${await getSession()}`
+        // Spring rejects requests from origins it doesn't know; to the backend this is server-to-server
+        delete req.headers.origin
+        delete req.headers.referer
+        next()
+      } catch (error) {
+        console.error('[dev-auth] sign-in failed:', error instanceof Error ? error.message : error)
+        res.statusCode = 502
+        res.end('dev-auth: could not sign in to Keycloak, see the Vite terminal')
+      }
+    })
+  }
+
+  // Works for `npm run dev` and `npm run preview`. The production bundle itself never uses this:
+  // it calls VITE_API_URL directly, so the preview only goes through the proxy when built with
+  // VITE_API_URL set to empty (e.g. for a local Lighthouse run against real data).
   return {
     name: 'dev-auth',
-    apply: 'serve',
-
-    config: () => ({
-      server: {
-        proxy: {
-          '/api': {
-            target: options.backendUrl,
-            changeOrigin: true,
-            configure: (proxy) => {
-              // An expired session comes back as 401: drop it so the next call signs in again
-              proxy.on('proxyRes', (res) => {
-                if (res.statusCode === 401 && canSignIn) session = undefined
-              })
-            },
-          },
-        },
-      },
-    }),
-
-    // Runs before Vite's own middlewares, so headers are set before the proxy forwards them
-    configureServer(server) {
-      if (!canSignIn && !options.session) {
-        console.warn('[dev-auth] no credentials in .env.local, /api calls will get 401. See .env.example')
-        return
-      }
-
-      server.middlewares.use(async (req: IncomingMessage, res, next) => {
-        if (!req.url?.startsWith('/api')) return next()
-        try {
-          req.headers.cookie = `SESSION=${await getSession()}`
-          // Spring rejects requests from origins it doesn't know; to the backend this is server-to-server
-          delete req.headers.origin
-          delete req.headers.referer
-          next()
-        } catch (error) {
-          console.error('[dev-auth] sign-in failed:', error instanceof Error ? error.message : error)
-          res.statusCode = 502
-          res.end('dev-auth: could not sign in to Keycloak, see the Vite terminal')
-        }
-      })
-    },
+    config: () => ({ server: { proxy }, preview: { proxy } }),
+    configureServer: attachSession,
+    configurePreviewServer: attachSession,
   }
 }

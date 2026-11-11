@@ -2,7 +2,7 @@ import type { MaterialStatus } from '../../mocks/profile.ts'
 
 const STATUS_STYLES: Record<MaterialStatus, { label: string; mark: string; className: string }> = {
   APPROVED: {
-    label: 'დამტკიცებული',
+    label: 'დადასტურებული',
     mark: '✓',
     className: 'border-status-approved-border bg-status-approved-bg text-status-approved',
   },

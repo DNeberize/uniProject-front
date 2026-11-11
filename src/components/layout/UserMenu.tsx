@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import type { UserRole } from '../../api/user.ts'
 import { useCurrentUser } from '../../auth/useCurrentUser.ts'
 import { ROUTES } from '../../config/routes.ts'
+import UserAvatar from '../UserAvatar.tsx'
 
 const ROLE_LABELS: Record<UserRole, string> = {
   USER: 'სტუდენტი',
@@ -38,9 +39,13 @@ export default function UserMenu() {
             <span className="font-label text-label-md text-secondary">არ ხართ შესული</span>
           )}
         </div>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
-          <span className="material-symbols-outlined text-[18px] text-on-primary">person</span>
-        </div>
+        {user ? (
+          <UserAvatar user={user} />
+        ) : (
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
+            <span className="material-symbols-outlined text-[18px] text-on-primary">person</span>
+          </div>
+        )}
       </Link>
 
       <form method="post" action="/logout">
