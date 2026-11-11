@@ -1,4 +1,4 @@
-// Placeholder profile data for markup only — replace with the profile API later.
+// Placeholder profile data for markup only. Replace with the profile API later.
 // Name, email, role and registration date already come from GET /api/auth (useCurrentUser).
 
 export type MaterialStatus = 'APPROVED' | 'PENDING' | 'REJECTED'
@@ -46,7 +46,7 @@ export const MOCK_MY_MATERIALS: MyMaterial[] = [
     subjectCode: 'STAT-204',
     uploadDate: '2025-02-10',
     status: 'REJECTED',
-    rejectionReason: 'დაბალი ხარისხი — ფაილი არ იკითხება (გადაიღეთ მაღალი რეზოლუციით ან გადაიყვანეთ PDF ფორმატში)',
+    rejectionReason: 'დაბალი ხარისხი: ფაილი არ იკითხება (გადაიღეთ მაღალი რეზოლუციით ან გადაიყვანეთ PDF ფორმატში)',
   },
   {
     id: 104,

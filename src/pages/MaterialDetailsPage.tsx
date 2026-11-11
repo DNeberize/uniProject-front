@@ -223,7 +223,7 @@ function PreviewBody({ title, fileUrl }: { title: string; fileUrl: string }) {
 
     return (
       <iframe
-        title={`${title} — პრევიუ`}
+        title={`პრევიუ: ${title}`}
         src={`${fileUrl}#view=Fit&zoom=page-fit&navpanes=0`}
         className={`block w-full rounded border border-outline bg-surface-container-low ${FRAME_HEIGHT}`}
       />
@@ -244,7 +244,7 @@ function PreviewBody({ title, fileUrl }: { title: string; fileUrl: string }) {
   if (kind === 'text') {
     return (
       <iframe
-        title={`${title} — პრევიუ`}
+        title={`პრევიუ: ${title}`}
         src={fileUrl}
         className={`block w-full rounded border border-outline bg-white ${FRAME_HEIGHT}`}
       />
@@ -258,8 +258,8 @@ function PreviewBody({ title, fileUrl }: { title: string; fileUrl: string }) {
       </span>
       <p className="text-body-md text-on-surface-variant">
         {failed
-          ? `${kind === 'image' ? 'სურათი' : 'ფაილი'} ვერ ჩაიტვირთა — სცადე გადმოწერა ან ახალ ფანჯარაში გახსნა.`
-          : 'ამ ფაილის პრევიუ ბრაუზერში არ ჩანს — გადმოწერე და ისე გახსენი.'}
+          ? `${kind === 'image' ? 'სურათი' : 'ფაილი'} ვერ ჩაიტვირთა. სცადე გადმოწერა ან ახალ ფანჯარაში გახსნა.`
+          : 'ამ ფაილის პრევიუ ბრაუზერში არ ჩანს. გადმოწერე და ისე გახსენი.'}
       </p>
     </div>
   )

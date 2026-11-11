@@ -2,7 +2,7 @@ import type { Area } from 'react-easy-crop'
 
 /**
  * Output edge in px. The largest avatar is 80px (profile card): 256 covers that on 3x screens, and the
- * 32–40px avatars in the header and on cards download ~4x fewer bytes than at 512.
+ * 32-40px avatars in the header and on cards download ~4x fewer bytes than at 512.
  */
 const OUTPUT_SIZE = 256
 

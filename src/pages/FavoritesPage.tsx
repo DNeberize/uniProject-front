@@ -12,7 +12,7 @@ export default function FavoritesPage() {
   const materials = favorites.data ?? []
 
   return (
-    <PageContainer title="შენახული მასალები" subtitle="მასალები, რომლებიც რჩეულებში დაამატე — ყოველთვის ხელთ.">
+    <PageContainer title="შენახული მასალები" subtitle="მასალები, რომლებიც რჩეულებში დაამატე, ყოველთვის ხელთ.">
       {failed && (
         <StickyNote title="რჩეულები ვერ ჩაიტვირთა" className="mt-space-xl w-72 -rotate-1">
           <p>სერვერთან კავშირი ვერ მოხერხდა. სცადე გვერდის განახლება.</p>

@@ -40,7 +40,7 @@ export default function HomePage() {
   return (
     <PageContainer title="სასწავლო მასალები">
       <p className="mt-space-lg max-w-prose text-body-lg text-on-surface-variant">
-        კონსპექტები, სილაბუსები და გამოცდის მასალები — <Highlight>ყველაფერი ერთ რვეულში</Highlight>,
+        კონსპექტები, სილაბუსები და გამოცდის მასალები, <Highlight>ყველაფერი ერთ რვეულში</Highlight>.
       </p>
 
       <div className="mt-space-xl max-w-3xl">

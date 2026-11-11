@@ -70,7 +70,7 @@ export default function FileDropzone({ file, onChange }: FileDropzoneProps) {
       </p>
       {tooLarge && (
         <p role="alert" className="mt-space-sm text-body-sm font-medium text-error">
-          ფაილი ძალიან დიდია — მაქსიმუმ {MAX_FILE_MB} MB.
+          ფაილი ძალიან დიდია (მაქსიმუმ {MAX_FILE_MB} MB).
         </p>
       )}
 

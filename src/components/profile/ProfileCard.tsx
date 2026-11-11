@@ -32,7 +32,7 @@ export default function ProfileCard() {
         </div>
       ) : !user ? (
         <p className="py-space-md text-center font-hand text-[22px] text-secondary">
-          პროფილის ჩატვირთვა ვერ მოხერხდა — არ ხართ შესული
+          პროფილი ვერ ჩაიტვირთა, რადგან არ ხართ შესული
         </p>
       ) : (
         <>
