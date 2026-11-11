@@ -334,7 +334,7 @@ html:not(.icons-ready) .material-symbols-outlined {
 }
 
 .doodle path {
-  stroke-dasharray: 1;
+  stroke-dasharray: 1 3;
   animation: nb-draw 0.8s var(--draw-delay, 0s) ease-out both;
 }
 
@@ -356,7 +356,7 @@ html:not(.icons-ready) .material-symbols-outlined {
 
 @keyframes nb-draw {
   from {
-    stroke-dashoffset: 1;
+    stroke-dashoffset: 1.01;
   }
   to {
     stroke-dashoffset: 0;
